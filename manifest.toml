@@ -1,0 +1,71 @@
+schema_version = 1
+plugin_name = "phylo-treeness"
+
+[image]
+reference = "ghcr.io/auto-nomics/autonomics/phylo-treeness@sha256:f5f8cbe8dc2bed61e0e8011ca7e43446e25acb783f23c5b7f078037867b961dd"
+tag = "0.1.0"
+upstream = "MAFFT 7.526, ClipKIT 2.14.0, IQ-TREE 3.1.4, PhyKIT 2.7.0 (bioconda)"
+license = "GPL-3.0-or-later"
+
+[[nodes]]
+kind = "phylo_scogs_treeness"
+desc = "Aligns, trims, trees, and computes treeness for a tar of per-gene SCOG protein FASTAs."
+doc = """
+Input port 0 is a tar archive whose members are per-gene multi-FASTA protein
+files named <gene_id>.faa (or .fasta); each file holds the single-copy
+ortholog sequences of one gene across the taxa of one clade. The gene
+identifier is the file stem.
+
+For every gene the node runs MAFFT (--auto, capped threads), ClipKIT
+(default gappy mode), IQ-TREE (-m MODEL, fixed seed), then PhyKIT treeness
+(sum of internal branch lengths divided by total tree length on the inferred
+tree). Genes with fewer sequences than min_taxa are recorded with status
+too_few_taxa and never treed. A per-gene tool failure is recorded with a
+failed_* status; the node never aborts because of individual genes.
+
+Output 0 (phylo_scogs_treeness_tsv) has one row per input gene with columns
+gene_id, n_taxa, treeness, status, sorted by gene_id; treeness is empty on
+non-ok rows. Output 1 (phylo_scogs_treeness_json) is a run report with
+counts (input_genes, trees_built, treeness_computed, skipped_too_few_taxa,
+failed, n_zero_treeness, trees_with_3_taxa, trees_with_4_taxa), the median
+and mean treeness across successfully treed genes (null when none), the
+resolved parameters, and the pinned tool versions.
+
+Three-taxon unrooted trees have no internal branches, so their treeness is
+exactly 0. Downstream consumers comparing clades (e.g. fungi versus animals)
+should read median_treeness from two runs of this node and subtract, or
+restrict to 4-taxon trees using the TSV n_taxa column.
+"""
+timeout_secs = 14400
+artifact_prefix = "/artifacts/phylo_scogs_treeness"
+
+[nodes.ports]
+inputs = [
+  { type = "file", label = "scogs_genes", accepted_formats = ["tar"] },
+]
+outputs = [
+  { path = "treeness.tsv", format = "phylo_scogs_treeness_tsv" },
+  { path = "treeness_summary.json", format = "phylo_scogs_treeness_json" },
+]
+
+[nodes.params]
+threads = { type = "int", default = 2, min = 1.0, max = 16.0, doc = "Thread cap for MAFFT and IQ-TREE; keep low on shared hosts because alignment/tree memory scales with threads" }
+model = { type = "string", default = "TEST", doc = "IQ-TREE substitution model specification; TEST runs ModelFinder per gene, or pass a fixed model such as LG+G4" }
+min_taxa = { type = "int", default = 3, min = 2.0, max = 100.0, doc = "Genes with fewer sequences than this are skipped without alignment (status too_few_taxa)" }
+seed = { type = "int", default = 12345, min = 0.0, doc = "Fixed IQ-TREE random seed for reproducible tree inference" }
+
+[nodes.command]
+interpreter = "bash"
+script_file = "scripts/phylo_scogs_treeness.sh"
+
+[nodes.command.env]
+AUTONOMICS_THREADS = "{{ threads }}"
+AUTONOMICS_MODEL = "{{ model }}"
+AUTONOMICS_MIN_TAXA = "{{ min_taxa }}"
+AUTONOMICS_SEED = "{{ seed }}"
+
+[nodes.resources]
+cpus = 2.0
+memory = "8Gi"
+pids_limit = 512
+shm_size = "1Gi"
