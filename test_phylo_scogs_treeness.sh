@@ -9,7 +9,7 @@ set -euo pipefail
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 runner="${PHYLO_RUNNER:-container}"
 image_tag="${PHYLO_IMAGE:-localhost/autonomics/phylo-treeness:0.1.0}"
-image_ref="ghcr.io/auto-nomics/autonomics/phylo-treeness@sha256:f5f8cbe8dc2bed61e0e8011ca7e43446e25acb783f23c5b7f078037867b961dd"
+image_ref="ghcr.io/auto-nomics/autonomics/phylo-treeness@sha256:7e938250ab0fe718e0fcfad120293f1a08814c67aecce3b0cb4b86c2f853a3cb"
 script="$root/scripts/phylo_scogs_treeness.sh"
 
 work="$(mktemp -d)"

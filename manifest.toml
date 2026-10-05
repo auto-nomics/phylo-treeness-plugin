@@ -2,7 +2,7 @@ schema_version = 1
 plugin_name = "phylo-treeness"
 
 [image]
-reference = "ghcr.io/auto-nomics/autonomics/phylo-treeness@sha256:f5f8cbe8dc2bed61e0e8011ca7e43446e25acb783f23c5b7f078037867b961dd"
+reference = "ghcr.io/auto-nomics/autonomics/phylo-treeness@sha256:7e938250ab0fe718e0fcfad120293f1a08814c67aecce3b0cb4b86c2f853a3cb"
 tag = "0.1.0"
 upstream = "MAFFT 7.526, ClipKIT 2.14.0, IQ-TREE 3.1.4, PhyKIT 2.7.0 (bioconda)"
 license = "GPL-3.0-or-later"

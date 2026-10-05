@@ -75,11 +75,11 @@ Digest-pinned base and exact bioconda pins:
 
 Build: `podman build -t ghcr.io/auto-nomics/autonomics/phylo-treeness:0.1.0 .`
 
-**Release status:** the `image.reference` digest is the local build's
-manifest digest (`podman images --digests`); it is valid for local
-development and runtime resolution on this host. GHCR publication is the
-remaining release gate — push the image, copy the registry-returned
-repository digest into `manifest.toml`, and commit.
+**Release status:** the `image.reference` digest is the **registry-returned
+repository digest** of the GHCR push
+(`sha256:7e938250ab0fe718e0fcfad120293f1a08814c67aecce3b0cb4b86c2f853a3cb`),
+verified resolvable via
+`podman pull …@sha256:<digest>`.
 
 ## Resource overrides
 
